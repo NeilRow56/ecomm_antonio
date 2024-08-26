@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/providers/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ModalProvider } from "@/providers/ModalProvider";
+import db from "@/lib/db";
 
 const inter = Inter({ subsets: ["latin"] });
 

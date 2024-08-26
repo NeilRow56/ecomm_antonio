@@ -12,5 +12,5 @@ export default function SetupPage() {
       onOpen();
     }
   }, [isOpen, onOpen]);
-  return <main className="p-4">Store Modal</main>;
+  return null;
 }

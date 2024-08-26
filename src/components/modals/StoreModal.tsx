@@ -16,26 +16,42 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
-const formSchema = z.object({
-  name: z.string().min(1, {
-    message: "Name is required",
-  }),
-});
+import { CreateStoreSchema, CreateStoreValues } from "@/schemas/stores";
+import { useTransition } from "react";
+import { Loader2, Save } from "lucide-react";
+import { store_creation } from "@/actions/store";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export const StoreModal = () => {
   const storeModal = useModal();
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+  const form = useForm<CreateStoreValues>({
+    resolver: zodResolver(CreateStoreSchema),
     defaultValues: {
       name: "",
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-    //TODO Create Store
+  const onSubmit = (data: z.infer<typeof CreateStoreSchema>) => {
+    startTransition(() => {
+      store_creation(data)
+        .then((data) => {
+          if (data?.error) {
+            form.reset();
+            toast.error(data.error);
+          }
+
+          if (data?.success) {
+            form.reset();
+            toast.success(data.success);
+            router.push("/");
+            router.refresh();
+          }
+        })
+        .catch(() => toast.error("Something went wrong"));
+    });
   };
   return (
     <Modal
@@ -57,12 +73,16 @@ export const StoreModal = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="">Name</FormLabel>
+                    <FormLabel htmlFor="name" className="flex w-full">
+                      Name
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder="Selfridges "
-                        className="w-full"
+                        id="name"
+                        name="name"
+                        placeholder="Great New Store"
+                        disabled={isPending}
                       />
                     </FormControl>
                     <FormMessage />
@@ -73,7 +93,17 @@ export const StoreModal = () => {
                 <Button variant="outline" onClick={storeModal.onClose}>
                   Cancel
                 </Button>
-                <Button type="submit">Continue</Button>
+                <Button type="submit" className="max-w-[150px]">
+                  {isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4" /> Processing
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" /> Continue
+                    </>
+                  )}
+                </Button>
               </div>
             </form>
           </Form>
