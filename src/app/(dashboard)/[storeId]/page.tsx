@@ -1,7 +1,17 @@
+import db from "@/lib/db";
 import React from "react";
 
-const IndividualStorePage = () => {
-  return <div>This is a dashboard for the Store </div>;
+interface DashboardPageProps {
+  params: { storeId: string };
+}
+
+const DashboardPage = async ({ params }: DashboardPageProps) => {
+  const store = await db.store.findFirst({
+    where: {
+      id: params.storeId,
+    },
+  });
+  return <div>Active Store: {store?.name}</div>;
 };
 
-export default IndividualStorePage;
+export default DashboardPage;
