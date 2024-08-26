@@ -21,7 +21,7 @@ import { useTransition } from "react";
 import { Loader2, Save } from "lucide-react";
 import { store_creation } from "@/actions/store";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 
 export const StoreModal = () => {
   const storeModal = useModal();
@@ -46,8 +46,9 @@ export const StoreModal = () => {
           if (data?.success) {
             form.reset();
             toast.success(data.success);
-            router.push("/");
-            router.refresh();
+            setTimeout(() => {
+              window.location.reload();
+            }, 100);
           }
         })
         .catch(() => toast.error("Something went wrong"));

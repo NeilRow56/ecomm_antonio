@@ -6,6 +6,7 @@ import db from "@/lib/db";
 import { CreateStoreSchema } from "@/schemas/stores";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 export const store_creation = async (
   values: z.infer<typeof CreateStoreSchema>
@@ -26,14 +27,16 @@ export const store_creation = async (
 
   const { name } = validatedFields.data;
 
+  let store;
   try {
-    await db.store.create({
+    store = await db.store.create({
       data: {
         name,
         userId: userId,
       },
     });
-    revalidatePath("/");
+    revalidatePath(`${store.id}`);
+
     return { success: "Store creation successful!" };
   } catch (error) {
     return { message: "Database Error: Failed to Update Settings." };
