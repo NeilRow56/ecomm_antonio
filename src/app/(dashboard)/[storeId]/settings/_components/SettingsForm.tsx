@@ -13,9 +13,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
-import { Trash } from "lucide-react";
-import React, { useState } from "react";
-import { UpdateStoreSchema } from "@/schemas/stores";
+import { Loader2, Save, Trash } from "lucide-react";
+import React, { useState, useTransition } from "react";
+import { UpdateStoreSchema, UpdateStoreValues } from "@/schemas/stores";
 import { Input } from "@/components/ui/input";
 import Heading from "@/components/shared/Heading";
 import { Store } from "@prisma/client";
@@ -26,12 +26,13 @@ interface SettingsFormProps {
 
 const SettingsForm = ({ initialData }: SettingsFormProps) => {
   const [open, setOpen] = useState(false);
-  const form = useForm<z.infer<typeof UpdateStoreSchema>>({
+  const [isPending, startTransition] = useTransition();
+  const form = useForm<UpdateStoreValues>({
     resolver: zodResolver(UpdateStoreSchema),
     defaultValues: initialData,
   });
 
-  const onSubmit = (values: z.infer<typeof UpdateStoreSchema>) => {
+  const onSubmit = (values: UpdateStoreValues) => {
     console.log(values);
     //TODO Update Store
   };
@@ -42,7 +43,12 @@ const SettingsForm = ({ initialData }: SettingsFormProps) => {
           title="Settings"
           description="Manage your settings preferences "
         />
-        <Button variant="destructive" size="icon" onClick={() => setOpen(true)}>
+        <Button
+          disabled={isPending}
+          variant="destructive"
+          size="icon"
+          onClick={() => setOpen(true)}
+        >
           <Trash />
         </Button>
       </div>
@@ -60,15 +66,27 @@ const SettingsForm = ({ initialData }: SettingsFormProps) => {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Store name" {...field} />
+                    <Input
+                      placeholder="Store name"
+                      {...field}
+                      disabled={isPending}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
-          <Button className="ml-auto" type="submit">
-            Save changes
+          <Button type="submit" className="max-w-[150px]">
+            {isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4" /> Processing
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" /> Update
+              </>
+            )}
           </Button>
         </form>
       </Form>
